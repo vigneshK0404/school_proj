@@ -7,15 +7,25 @@
 #include "TH1F.h"
 #include "TSystem.h"
 #include <vector>
+#include <algorithm>
 
-double waveFunc(std::vector<int> v, double x)
+std::vector<std::vector<double>> waveFunc(std::vector<int> v, std::vector<double> x)
 {
-    double h = 0;
+    std::vector<std::vector<double>> powerVec;
+    std::vector<double> yArr(x.size());
+    
     for(size_t i = 0; i < v.size(); ++i)
     {
-        h += std::hermite(v[i],x) * std::exp(-(x*x));
+        for(size_t j = 0; j < x.size(); ++j)
+        {
+            yArr[j] =  std::hermite(v[i],x[j]) * std::exp(-(x[j]*x[j]));
+            //printf("%f\n",yArr[j]);
+        }
+        //std::cout << std::endl;
+
+        powerVec.push_back(yArr);
     }
-   return h;
+   return powerVec;
 }
 int main(int argc, char** argv)
 {
@@ -24,18 +34,38 @@ int main(int argc, char** argv)
     const double lower_bound = -5;
     const double step_size = (upper_bound - lower_bound) / num_points;
     const double t_max = 500;
+    const double o_freq = 1;
 
     double t = 0;
     double t_step = 1e-3;
 
-    bool first_draw = true;    
+    bool first_draw = true;   
 
+    /*****************************************************/
+
+    std::vector<int> powers = {0,1,2,3,4}; //ENTER POWERS HERE
+    size_t pSize = powers.size();
+                                   
+    /*****************************************************/
+
+    std::vector<double> xArr(num_points);
+
+    double inputX = lower_bound;
+    for(int i = 0; i < num_points; ++i)
+    {
+        xArr[i] = inputX;
+        inputX += step_size;
+    } 
+
+    std::vector<std::vector<double>> powerVec = waveFunc(powers,xArr);
+
+    
     TApplication* app = new TApplication("app",0,0);    
 
     TCanvas c1("c1", "func", 1600,800);
     c1.cd();
 
-    TH1F* frame = gPad->DrawFrame(lower_bound, -2.0, upper_bound, 2.0);
+    TH1F* frame = gPad->DrawFrame(lower_bound, -10, upper_bound, 10);
     frame->GetXaxis()->SetTitle("x");
     frame->GetYaxis()->SetTitle("Psi(x)");
 
@@ -45,18 +75,10 @@ int main(int argc, char** argv)
     double* x = tg.GetX();
     double* y = tg.GetY();
 
-    double* yArr = new double[num_points];
-
-    std::vector<int> powers = {0,1,2};
-
-    double inputX = lower_bound;
     for(int i = 0; i < num_points; ++i)
     {
-        x[i] = inputX;
-        yArr[i] = waveFunc(powers,inputX);
-        inputX += step_size;
+        x[i] = xArr[i];
     } 
-
 
     tg.Draw("L SAME");
 
@@ -68,9 +90,17 @@ int main(int argc, char** argv)
     {
         for(int i = 0; i < num_points; ++i)
         {
-            y[i] = cos(t)*yArr[i];
+            y[i] = 0;
         }
 
+        for(size_t p = 0; p < pSize; ++p)
+        {
+            double omega = o_freq * (powers[p] + 0.5);
+            for(size_t k = 0; k < num_points; ++k)
+            {
+                y[k] += (cos(omega*t) * powerVec[p][k]) / sqrt(pSize);
+            }
+        }
         
         if(static_cast<int>(t*1000) % 10 ==0)
         {
@@ -85,7 +115,7 @@ int main(int argc, char** argv)
 
     app->Run();    
     
-    delete app,x,y,yArr;
+    delete app;
     
     return 0;
 }
