@@ -65,25 +65,34 @@ int main(int argc, char** argv)
     TCanvas c1("c1", "func", 1600,800);
     c1.cd();
 
-    TH1F* frame = gPad->DrawFrame(lower_bound, -10, upper_bound, 10);
+    TH1F* frame = gPad->DrawFrame(lower_bound, -50, upper_bound, 50);
     frame->GetXaxis()->SetTitle("x");
     frame->GetYaxis()->SetTitle("Psi(x)");
 
     TGraph tg(num_points);
+    TGraph tg2(num_points);
     tg.SetLineWidth(2);
+    tg2.SetLineWidth(2);
 
     double* x = tg.GetX();
     double* y = tg.GetY();
+    double * y2 = tg2.GetY();
+    double* x2 = tg2.GetX();
 
     for(int i = 0; i < num_points; ++i)
     {
         x[i] = xArr[i];
-    } 
+        x2[i] = xArr[i];
+    }   
 
     tg.Draw("L SAME");
+    tg2.SetLineColor(kRed);
+    tg2.Draw("L SAME");
 
     gPad->Modified();
     gPad->Update();
+
+
 
 
     while(t < t_max)
@@ -91,6 +100,7 @@ int main(int argc, char** argv)
         for(int i = 0; i < num_points; ++i)
         {
             y[i] = 0;
+            y2[i] = 0;
         }
 
         for(size_t p = 0; p < pSize; ++p)
@@ -99,6 +109,7 @@ int main(int argc, char** argv)
             for(size_t k = 0; k < num_points; ++k)
             {
                 y[k] += (cos(omega*t) * powerVec[p][k]) / sqrt(pSize);
+                y2[k] += y[k]*y[k];
             }
         }
         
