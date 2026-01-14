@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     const double o_freq = 1;
 
     double t = 0;
-    double t_step = 5e-3;
+    double t_step = 1e-3;
 
     bool first_draw = true;   
 
