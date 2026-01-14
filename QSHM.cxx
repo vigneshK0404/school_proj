@@ -8,6 +8,9 @@
 #include "TSystem.h"
 #include <vector>
 #include <algorithm>
+#include "TMath.h"
+
+const double pi_inv = 1.0/TMath::Pi();
 
 std::vector<std::vector<double>> waveFunc(std::vector<int> v, std::vector<double> x)
 {
@@ -16,9 +19,11 @@ std::vector<std::vector<double>> waveFunc(std::vector<int> v, std::vector<double
     
     for(size_t i = 0; i < v.size(); ++i)
     {
+        double norm = 1.0/sqrt(std::pow(2,v[i]) * TMath::Factorial(v[i]));
         for(size_t j = 0; j < x.size(); ++j)
         {
             yArr[j] =  std::hermite(v[i],x[j]) * std::exp(-(x[j]*x[j]));
+            yArr[j] = yArr[j]*norm/std::pow(pi_inv,0.25);
             //printf("%f\n",yArr[j]);
         }
         //std::cout << std::endl;
@@ -29,7 +34,7 @@ std::vector<std::vector<double>> waveFunc(std::vector<int> v, std::vector<double
 }
 int main(int argc, char** argv)
 {
-    const int num_points = 1000;
+    const int num_points = 500;
     const double upper_bound = 5;
     const double lower_bound = -5;
     const double step_size = (upper_bound - lower_bound) / num_points;
@@ -37,13 +42,13 @@ int main(int argc, char** argv)
     const double o_freq = 1;
 
     double t = 0;
-    double t_step = 1e-3;
+    double t_step = 5e-3;
 
     bool first_draw = true;   
 
     /*****************************************************/
 
-    std::vector<int> powers = {0,1,2,3,4}; //ENTER POWERS HERE
+    std::vector<int> powers = {0,1,3}; //ENTER POWERS HERE
     size_t pSize = powers.size();
                                    
     /*****************************************************/
@@ -65,7 +70,7 @@ int main(int argc, char** argv)
     TCanvas c1("c1", "func", 1600,800);
     c1.cd();
 
-    TH1F* frame = gPad->DrawFrame(lower_bound, -50, upper_bound, 50);
+    TH1F* frame = gPad->DrawFrame(lower_bound, -5, upper_bound, 5);
     frame->GetXaxis()->SetTitle("x");
     frame->GetYaxis()->SetTitle("Psi(x)");
 
@@ -113,7 +118,7 @@ int main(int argc, char** argv)
             }
         }
         
-        if(static_cast<int>(t*1000) % 10 ==0)
+        if(static_cast<int>(t*1000) % 100 ==0)
         {
             gPad->Modified();
             gPad->Update();
