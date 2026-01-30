@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
     /*****************************************************/
 
-    std::vector<int> powers = {0,1,45,10000,10003,100005}; //ENTER POWERS HERE
+    std::vector<int> powers = {0,1,static_cast<int>(1e6)}; //ENTER POWERS HERE
     size_t pSize = powers.size();
                                    
     /*****************************************************/
@@ -143,14 +143,17 @@ int main(int argc, char** argv)
             y2[i] = 0;
         }
 
-        for(size_t p = 0; p < pSize; ++p)
+        for(size_t k = 0; k < num_points; ++k)
         {
-            Double_t omega = o_freq * (powers[p] + 0.5);
-            for(size_t k = 0; k < num_points; ++k)
+            for(size_t p = 0; p < pSize; ++p)
             {
-                y[k] += (cos(omega*t) * powerVec[p][k]) / sqrt(pSize);
-                y2[k] += y[k]*y[k];
+                Double_t omega = o_freq * (powers[p] + 0.5);
+                y[k] += (cos(omega*t) * powerVec[p][k]) / sqrt(pSize); 
             }
+            y2[k] = y[k]*y[k];
+
+        //TODO : FIX Prob density it is not accounting for cross terms right now
+
         }
         
         if(static_cast<int>(t*1000) % 100 ==0)
