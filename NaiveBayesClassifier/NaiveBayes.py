@@ -4,13 +4,10 @@ import math
 alpha = 1
 
 class NaiveBayes():
-    def __init__(self,file_path : str):
-        dL = DataLoader(file_path)
-        dL.load_data()
-        dL.split_data()
+    def __init__(self, trainLabels, trainData):
 
-        self.trainLabels = dL.trainLabels
-        self.trainData = dL.trainData
+        self.trainLabels = trainLabels
+        self.trainData = trainData
 
         #print(f"{self.trainLabels[-1]} : {self.trainData[-1]}")
 
@@ -67,24 +64,32 @@ class NaiveBayes():
             self.spamDict[j] = math.log10((self.spamDict[j] + alpha)/(self.totalSpamWords + alpha*self.totalUniqueWords))
 
 
+        
+
     def prediction(self,words : list):
         
-        hamProb = 0
-        spamProb = 0
+        hamProb = math.log10(self.hamPrior)
+        spamProb = math.log10(self.spamPrior)
         for idx in range(len(words)):
             word = words[idx]
             if word in self.hamWordList:
+                #print(f"{word} : Existing HamProb - {self.hamDict[word]}")
                 hamProb += self.hamDict[word]
             else:
-                hamProb += math.log10(alpha/(self.totalHamWords + alpha*self.totalUniqueWords))
+                HnewProb = math.log10(alpha/(self.totalHamWords + alpha*self.totalUniqueWords))
+                hamProb += HnewProb
+                #print(f"{word} : New HamProb - {HnewProb}")
 
             if word in self.spamWordList:
+                #print(f"{word} : Existing SpamProb - {self.spamDict[word]}")
                 spamProb += self.spamDict[word]
             else:
-                spamProb += math.log10(alpha/(self.totalSpamWords + alpha*self.totalUniqueWords))
+                SnewProb = math.log10(alpha/(self.totalSpamWords + alpha*self.totalUniqueWords))
+                spamProb += SnewProb
+                #print(f"{word} : New SpamProb - {SnewProb}")
 
 
-        print(f"{words} : hamProb - {hamProb} \nspamProb - {spamProb}")
+        #print(f"{words}\nhamProb - {hamProb}\nspamProb - {spamProb}")
 
 
         inference = 0 if hamProb > spamProb else 1
@@ -94,14 +99,19 @@ class NaiveBayes():
 
 
 if __name__ == "__main__":
-    nB = NaiveBayes("SMSSpamCollection.txt")
+
+    dL = DataLoader("SMSSpamCollection.txt")
+    dL.load_data()
+    dL.split_data()
+
+    nB = NaiveBayes(dL)
     nB.train()
 
-    #print(nB.prediction(["rofl","its","going","to","fun"]))
-    #print(nB.prediction(["text","100","to","confirm"]))
+    print(nB.prediction(["rofl","its","going","to","fun"]),end="\n\n")
+    print(nB.prediction(["text","100","to","confirm"]))
 
-    print(f"spams : {nB.spamWordList}")
-    print(f"hams : {nB.hamWordList}")
+    #print(f"spams : {nB.spamWordList}")
+    #print(f"hams : {nB.hamWordList}")
 
 
 

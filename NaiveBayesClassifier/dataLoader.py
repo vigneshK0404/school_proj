@@ -81,10 +81,22 @@ class DataLoader():
 
 if __name__  == "__main__":
     dL = DataLoader("SMSSpamCollection.txt")
-    print(f"{dL.labels[-1]} : {dL.data[-1]}")
     dL.load_data()
-    print(f"{dL.labels[-1]} : {dL.data[-1]}")
-    dL.split_data()
-    print(f"{dL.trainLabels[-1]} : {dL.trainData[-1]} \n{dL.testLabels[-1]} : {dL.testData[-1]}")
+    dL.split_data() 
+
+    countHam = 0
+    countSpam = 0
+
+    for i in dL.labels :
+        if i == 0:
+            countHam += 1
+        elif i == 1:
+            countSpam += 1
+
+        else :
+            print("Error!")
+        
+    print(countHam)
+    print(countSpam)
 
 
