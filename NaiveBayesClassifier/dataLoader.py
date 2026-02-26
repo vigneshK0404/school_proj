@@ -13,12 +13,21 @@ import random
 
 class DataLoader():
     def __init__(self, file_path : str):
+        
         with open(file_path,"rt") as f:
             raw_input = f.read().lower()
 
-            
+        
+        self.trainRatio = 0.8
+        self.testRatio = 0.2
         self.labels = []
         self.data = []
+
+        self.trainLabels = []
+        self.trainData = []
+        self.testLabels = []
+        self.testData = []
+
         pS = PorterStemmer()
 
         stopWords = set(stopwords.words('english'))
@@ -42,14 +51,32 @@ class DataLoader():
     def split_data(self):
         tempidx = list(range(len(self.labels)))
         random.shuffle(tempidx)
-        tempLabels = []
-        tempData = []
-        for idx in tempidx:
-            tempLabels.append(self.labels[idx])
-            tempData.append(self.data[idx])
 
-        self.labels = tempLabels
-        self.data = tempData
+        trainidx = int(self.trainRatio*len(tempidx))
+        testidx = int(self.testRatio*len(tempidx))
+        
+        tempTrain = tempidx[:trainidx]
+        tempTest = tempidx[trainidx:]
+
+        trainLabels = []
+        trainData = []
+
+        testData = []
+        testLabels = []
+        
+        for idx in tempTrain:
+            trainLabels.append(self.labels[idx])
+            trainData.append(self.data[idx])
+
+        for idx in tempTest:
+            testLabels.append(self.labels[idx])
+            testData.append(self.data[idx])
+
+
+        self.trainLabels = trainLabels
+        self.trainData = trainData
+        self.testLabels = testLabels
+        self.testData = testData
 
 
 if __name__  == "__main__":
@@ -58,6 +85,6 @@ if __name__  == "__main__":
     dL.load_data()
     print(f"{dL.labels[-1]} : {dL.data[-1]}")
     dL.split_data()
-    print(f"{dL.labels[-1]} : {dL.data[-1]}")
+    print(f"{dL.trainLabels[-1]} : {dL.trainData[-1]} \n {dL.testLabels[-1]} : {dL.testData[-1]}")
 
 
