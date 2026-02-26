@@ -44,6 +44,7 @@ class NaiveBayes():
                         else:
                             self.hamDict[word] += 1
 
+
         self.hamPrior = hamCount / (hamCount + spamCount)
         self.spamPrior = spamCount / (hamCount + spamCount)
 
