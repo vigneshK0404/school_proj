@@ -85,6 +85,6 @@ if __name__  == "__main__":
     dL.load_data()
     print(f"{dL.labels[-1]} : {dL.data[-1]}")
     dL.split_data()
-    print(f"{dL.trainLabels[-1]} : {dL.trainData[-1]} \n {dL.testLabels[-1]} : {dL.testData[-1]}")
+    print(f"{dL.trainLabels[-1]} : {dL.trainData[-1]} \n{dL.testLabels[-1]} : {dL.testData[-1]}")
 
 
