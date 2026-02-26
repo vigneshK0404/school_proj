@@ -97,11 +97,11 @@ if __name__ == "__main__":
     nB = NaiveBayes("SMSSpamCollection.txt")
     nB.train()
 
-    print(nB.prediction(["rofl","its","going","to","fun"]))
-    print(nB.prediction(["text","100","to","confirm"]))
+    #print(nB.prediction(["rofl","its","going","to","fun"]))
+    #print(nB.prediction(["text","100","to","confirm"]))
 
-    #print(f"spams : {nB.spamWordList}")
-    #print(f"hams : {nB.hamWordList}")
+    print(f"spams : {nB.spamWordList}")
+    print(f"hams : {nB.hamWordList}")
 
 
 
