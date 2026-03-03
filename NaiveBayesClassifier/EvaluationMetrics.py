@@ -4,9 +4,8 @@ from dataLoader import DataLoader
 
 class EvaluationMetrics():
     def __init__(self, testLabels, testData, nB : NaiveBayes):
-        
-        nB = NaiveBayes(testLabels,testData)
-        nB.train()
+       
+        self.nB = nB
 
         self.testLabels = testLabels
         self.testData = testData
@@ -20,7 +19,7 @@ class EvaluationMetrics():
         FN = 0
 
         for words, label in zip(self.testData, self.testLabels):
-            predLabel = nB.prediction(words)
+            predLabel = self.nB.prediction(words)
             
             if label == 1 : #truth is spam
                 if label and predLabel :
