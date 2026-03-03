@@ -58,9 +58,12 @@ class NaiveBayes():
         self.hamPrior = hamCount / (hamCount + spamCount)
         self.spamPrior = spamCount / (hamCount + spamCount)
 
-        self.totalUniqueWords = len(self.hamWordList) + len(self.spamWordList)
-        for i,j in zip(self.hamDict.keys(), self.spamDict.keys()):
+        self.totalUniqueWords = len(self.hamWordList.union(self.spamWordList))
+
+        for i in self.hamDict.keys():
             self.hamDict[i] = math.log10((self.hamDict[i] + alpha)/(self.totalHamWords + alpha*self.totalUniqueWords))
+
+        for j in self.spamDict.keys():
             self.spamDict[j] = math.log10((self.spamDict[j] + alpha)/(self.totalSpamWords + alpha*self.totalUniqueWords))
 
 
@@ -73,24 +76,16 @@ class NaiveBayes():
         for idx in range(len(words)):
             word = words[idx]
             if word in self.hamWordList:
-                #print(f"{word} : Existing HamProb - {self.hamDict[word]}")
                 hamProb += self.hamDict[word]
             else:
                 HnewProb = math.log10(alpha/(self.totalHamWords + alpha*self.totalUniqueWords))
                 hamProb += HnewProb
-                #print(f"{word} : New HamProb - {HnewProb}")
 
             if word in self.spamWordList:
-                #print(f"{word} : Existing SpamProb - {self.spamDict[word]}")
                 spamProb += self.spamDict[word]
             else:
                 SnewProb = math.log10(alpha/(self.totalSpamWords + alpha*self.totalUniqueWords))
                 spamProb += SnewProb
-                #print(f"{word} : New SpamProb - {SnewProb}")
-
-
-        #print(f"{words}\nhamProb - {hamProb}\nspamProb - {spamProb}")
-
 
         inference = 0 if hamProb > spamProb else 1
 
@@ -104,7 +99,7 @@ if __name__ == "__main__":
     dL.load_data()
     dL.split_data()
 
-    nB = NaiveBayes(dL)
+    nB = NaiveBayes(dL.trainLabels, dL.trainData)
     nB.train()
 
     print(nB.prediction(["rofl","its","going","to","fun"]),end="\n\n")
