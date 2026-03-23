@@ -1,8 +1,8 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <random>
 
 
 struct particle
@@ -30,7 +30,7 @@ void ProbDensity(unsigned int n, unsigned int l, unsigned int m ,
         double rho = 2.0 *R /n;
         double Lag = std::assoc_laguerre(n-l-1, (2*l)+1, rho);
         double radialPart = Norm*std::exp(-rho/2)*std::pow(rho,l)*Lag;
-
+        //std::cout << "NEW RADIUS\n";
         for(const double& T : theta)
         {
             double wf = radialPart*std::sph_legendre(l,m,T);
@@ -83,30 +83,49 @@ int main()
             
     std::vector<double> psi;
 
-    std::cout << "Radii Size: " << Radii.size() << "\n";
+    //std::cout << "Radii Size: " << Radii.size() << "\n";
     
     ProbDensity(n,l,m,Radii,Thetas,psi);
 
     double maxProb = *max_element(psi.begin(),psi.end());
     
-    std::cout << maxProb << std::endl;
-    
+    std::random_device rd; // obtain a random number from hardware
+    std::mt19937 gen(rd()); // seed the generator
+
+    std::uniform_real_distribution<> coverDist(0,1.0);
+
+    double RadDistH = 1/(maxR-minR);
+    double ThetaDistH = 1/(maxT-minT);
+
+    double coverProb = maxProb * RadDistH * ThetaDistH;
 
 
-    /*sf::RenderWindow window(sf::VideoMode({200, 200}), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    std::vector<particle> particleVec;
+    size_t Tsize = Thetas.size();
 
-    while (window.isOpen())
+    for(size_t i = 0; i < Radii.size(); ++i)
     {
-        while (const std::optional event = window.pollEvent())
+        for(size_t j = 0; j < Thetas.size(); ++j)
         {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-        }
+            size_t idx = i*Tsize + j;
+            double probRatio = psi[idx]/coverProb;
+            double headFlip = coverDist(gen);
 
-        window.clear();
-        window.draw(shape);
-        window.display();
-    }*/
+            if(probRatio <= headFlip)
+            {
+                for(size_t k = 0; k < Phis.size(); ++k)
+                {
+                    particleVec.emplace_back(Radii[i],Thetas[j],Phis[k]);
+
+                }
+
+            }
+        }
+    }
+
+
+    std::cout << particleVec.size() << std::endl;
+
+
+        
 }
