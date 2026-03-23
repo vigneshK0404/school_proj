@@ -45,12 +45,20 @@ if __name__ == "__main__":
     dL.load_data()
     dL.split_data()
 
+    print("Data Loading and Pre-processing done.\n")
+
     nB = NaiveBayes(dL.trainLabels,dL.trainData)
     nB.train()
 
+    print("Naive Bayes Trained (Likelihood Tables built) \n")
+
     eM = EvaluationMetrics(dL.testLabels, dL.testData, nB)
+
+    print("Metrics Computed: \n")
     
-    print(eM.compute_metrics())
+    TP,FP,TN,FN,accuracy,precision,recall,F1 = eM.compute_metrics()
+
+    print(TP,FP,TN,FN,accuracy,precision,recall,F1)
 
 
 
