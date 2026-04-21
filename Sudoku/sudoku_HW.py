@@ -4,6 +4,11 @@ import random
 # =======================
 # CORE GAME CLASS
 # =======================
+
+def copylist(l):
+    return [item[:] for item in l]
+
+
 class SudokuGame:
     """
     Main game controller class
@@ -19,34 +24,48 @@ class SudokuGame:
 
     def __init__(self, difficulty='medium', original=None, solution=None, current=None):
         self.difficulty = difficulty
-        sel.foriginal = original
-        self.solution = solution
-        self.current_grid = current
-        """Initialize game state - new or loaded"""
-        # [Implementation unchanged]
+        if original is not None:
+            self.original_puzzle = original
+            self.current_grid = current
+            tmp = copylist(original)
+            if self.solve_sudoku(tmp) :
+                self.solution = tmp
 
+
+        if original is None:
+            self.generate_sudoku()
+       
     # =======================
     # PUZZLE GENERATION
     # =======================
     def generate_sudoku(self):
         
-        grid = [[0]*9]*9
-        grid = self.fill_box(grid,0,0)
-        grid = self.fill_box(grid,3,3)
-        grid = self.fill_box(grid,6,6)
+        grid = [[0 for _ in range(9)] for _ in range(9)]
 
+        grid = self.fill_box(copylist(grid),0,0)
+        grid = self.fill_box(copylist(grid),3,3)
+        grid = self.fill_box(copylist(grid),6,6)
+
+        self.original_puzzle = copylist(grid)
+
+        #print(self.original_puzzle)
         
         self.solve_sudoku(grid)
-        self.solution = grid
+        self.solution = copylist(grid)
 
-        ratio = self.DIFFICULTY_MAP[self.difficulty]*81
+        ratio = int(self.DIFFICULTY_MAP[self.difficulty]*81)
         removeList = random.sample(range(0,81),ratio)
 
 
         for i in removeList:
             r = int(i//9)
             c = int(i%9)
-            grid[r][c] = 0
+
+            protRow = int(r//3)
+            protCol = int(c // 3)
+            
+            if (protRow != protCol):
+                grid[r][c] = 0
         
     
         self.current_grid = grid
@@ -56,16 +75,17 @@ class SudokuGame:
 
 
     def fill_box(self, grid, row, col):
-        gridNums = random.shuffle([i for i in range(1,10)])
-        for r in range(row,row+3):
-            for c in range(col,col+3):
-                grid[r][c] = gridNums[r+(c%3)]
+        gridNums = [i for i in range(1,10)]
+        random.shuffle(gridNums)
+        for r in range(0,3):
+            for c in range(0,3):
+                grid[row+r][col+c] = gridNums[3*r+(c%3)]
         return grid
 
     # =======================
     # SOLVING ALGORITHMS
     # =======================
-
+    
     def solve_sudoku(self, grid):
         empty = self.find_empty_cell(grid)
         if not empty:
@@ -84,7 +104,7 @@ class SudokuGame:
     # GAME STATE MANAGEMENT
     # =======================
     def find_empty_cell(self, grid=None):
-       for r in range(len(grid)):
+        for r in range(len(grid)):
            for c in range(len(grid[r])):
                if grid[r][c] == 0:                 
                    return r,c
@@ -131,40 +151,56 @@ class SudokuGame:
             print("|",end=" ")
             for c in r:
                 print(c,end="   ")
-            print("|",end="\n")
+            print("|",end="\n\n")
         print("+---+---+---+---+---+---+---+---+---+---+")
 
 
     def save_progress(self, filename):
-
+        if filename[-4:] != ".txt":
+            filename += ".txt"
         with open(filename,"w") as f:
             for r in self.current_grid:
                 for c in r:
                     f.write('%s\n' %c)
 
         print(f"Game Saved Successfully at {filename}")
+        return True
         
 
     @classmethod
     def load_progress(cls, filename):
-        grid = [[0]*9]*9
+        grid = grid = [[0 for _ in range(9)] for _ in range(9)]
 
-        with open(filename) as f:
-            rawList = [a.rstrip() for a in f.readlines()]
+        if filename[-4:] != ".txt":
+            filename += ".txt"
 
+        try:
+            with open(filename) as f:
+                rawList = [int(a.rstrip()) for a in f.readlines()]
+        except FileNotFoundError :
+            return False
+        
         for i in range(len(rawList)):
             row = int(i//9)
             col = int(i%9)
             grid[row][col] = rawList[i]
 
-        cls.current_grid = grid
+        current_grid = copylist(grid)
 
-        """Load game state from file"""
-        """
-        may add try-except
-        """
+        for row in range(len(grid)):
+            for col in range(len(grid[row])):
+                r = int(row // 3)
+                c = int(col // 3)
 
+                if r == c :
+                    continue
+                grid[row][col] = 0
 
+        original_puzzle = copylist(grid)
+        
+        gameInstance = SudokuGame(difficulty = "medium", original = original_puzzle, current = current_grid) 
+        
+        return gameInstance
 
 # =======================
 # GAME INTERFACE
