@@ -1,11 +1,15 @@
 import random
+#from termcolor import colored
+
+
+#This is to highlight the 0s so it is easy to see, if you want to use this then go to the print function and uncomment line 156, comment out line 157 also uncomment the import line
 
 
 # =======================
 # CORE GAME CLASS
 # =======================
 
-def copylist(l):
+def copylist(l): #DEEP COPY FUNCTION
     return [item[:] for item in l]
 
 
@@ -24,7 +28,7 @@ class SudokuGame:
 
     def __init__(self, difficulty='medium', original=None, solution=None, current=None):
         self.difficulty = difficulty
-        if original is not None:
+        if original is not None:                #To use when NOT starting a new game, to get existing file and to not run generate_sudoku()
             self.original_puzzle = original
             self.current_grid = current
             tmp = copylist(original)
@@ -32,7 +36,7 @@ class SudokuGame:
                 self.solution = tmp
 
 
-        if original is None:
+        if original is None:        #To start a fresh game
             self.generate_sudoku()
        
     # =======================
@@ -42,16 +46,14 @@ class SudokuGame:
         
         grid = [[0 for _ in range(9)] for _ in range(9)]
 
-        grid = self.fill_box(copylist(grid),0,0)
+        grid = self.fill_box(copylist(grid),0,0)        #Populates 3 diagonal 3x3 grids using top left coordinates of row and package
         grid = self.fill_box(copylist(grid),3,3)
         grid = self.fill_box(copylist(grid),6,6)
 
-        self.original_puzzle = copylist(grid)
-
-        #print(self.original_puzzle)
+        self.original_puzzle = copylist(grid)       #Save original puzzle before altering
         
         self.solve_sudoku(grid)
-        self.solution = copylist(grid)
+        self.solution = copylist(grid)      #solve and copy grid to save solution
 
         ratio = int(self.DIFFICULTY_MAP[self.difficulty]*81)
         removeList = random.sample(range(0,81),ratio)
@@ -61,7 +63,7 @@ class SudokuGame:
             r = int(i//9)
             c = int(i%9)
 
-            protRow = int(r//3)
+            protRow = int(r//3)     #To not remove elements in the 3x3 block all those block coordinates will have the same floor 3 quotient (equivalent)
             protCol = int(c // 3)
             
             if (protRow != protCol):
@@ -74,7 +76,7 @@ class SudokuGame:
         
 
 
-    def fill_box(self, grid, row, col):
+    def fill_box(self, grid, row, col):         #Take in grid and the top left coordinate, just fill in the 3 right and and down.
         gridNums = [i for i in range(1,10)]
         random.shuffle(gridNums)
         for r in range(0,3):
@@ -86,7 +88,7 @@ class SudokuGame:
     # SOLVING ALGORITHMS
     # =======================
     
-    def solve_sudoku(self, grid):
+    def solve_sudoku(self, grid):           #Solve sudoku grid using recursion + backtracking
         empty = self.find_empty_cell(grid)
         if not empty:
             return True
@@ -103,7 +105,7 @@ class SudokuGame:
     # =======================
     # GAME STATE MANAGEMENT
     # =======================
-    def find_empty_cell(self, grid=None):
+    def find_empty_cell(self, grid=None):       #Returns the next empty cell by list traversal from left to right top to bottom. Returns False if not found.
         for r in range(len(grid)):
            for c in range(len(grid[r])):
                if grid[r][c] == 0:                 
@@ -113,12 +115,12 @@ class SudokuGame:
 
 
 
-    def is_valid_move_in_grid(self, grid, row, col, num):
+    def is_valid_move_in_grid(self, grid, row, col, num):  
         
-        if num in grid[row]:
+        if num in grid[row]:        #checks if the number is in row
             return False
 
-        for r in grid:
+        for r in grid:              #checks if number is in column
             if r[col] == num :
                 return False
 
@@ -128,7 +130,7 @@ class SudokuGame:
         row_end = row_start + 3
         col_end = col_start + 3
 
-        for r in range(row_start,row_end):
+        for r in range(row_start,row_end): #checks the block if it is a part of. floor 3 gives the BLOCK coordinats and multiplying by 3 gives corresponding top left coordinates
             for c in range(col_start,col_end):
                 if grid[r][c] == num:
                     return False
@@ -146,16 +148,22 @@ class SudokuGame:
     # VISUALIZATION & IO
     # =======================
     def print_grid(self):
-        print("+---+---+---+---+---+---+---+---+---+---+")
+        print("+---+---+---+---+---+---+---+---+---+-+")
         for r in self.current_grid:
             print("|",end=" ")
             for c in r:
-                print(c,end="   ")
+                if c == 0:
+                    #print(colored(c,"red"),end="   ")
+                    print(c,end="   ")
+                else:
+                    print(c,end="   ")
+
             print("|",end="\n\n")
-        print("+---+---+---+---+---+---+---+---+---+---+")
+
+        print("+---+---+---+---+---+---+---+---+---+-+")
 
 
-    def save_progress(self, filename):
+    def save_progress(self, filename):      #saves as a text file adds txt extension if not there already and "with" takes care of exceptions. 
         if filename[-4:] != ".txt":
             filename += ".txt"
         with open(filename,"w") as f:
