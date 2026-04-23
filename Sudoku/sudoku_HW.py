@@ -1,9 +1,10 @@
 import random
+
+
+#TODO
 #from termcolor import colored
-
-
 #This is to highlight the 0s so it is easy to see, if you want to use this then go to the print function and uncomment line 156, comment out line 157 also uncomment the import line
-
+#you may have to install termcolor 
 
 # =======================
 # CORE GAME CLASS
@@ -148,7 +149,8 @@ class SudokuGame:
     # VISUALIZATION & IO
     # =======================
     def print_grid(self):
-        print("+---+---+---+---+---+---+---+---+---+-+")
+        print("+-1-+-2-+-3-+-4-+-5-+-6-+-7-+-8-+-9-+-+")
+        idx = 1
         for r in self.current_grid:
             print("|",end=" ")
             for c in r:
@@ -158,7 +160,8 @@ class SudokuGame:
                 else:
                     print(c,end="   ")
 
-            print("|",end="\n\n")
+            print(f"|{idx}",end="\n\n")
+            idx += 1
 
         print("+---+---+---+---+---+---+---+---+---+-+")
 
