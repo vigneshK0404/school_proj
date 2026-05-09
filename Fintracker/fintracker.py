@@ -1,20 +1,38 @@
 from PyPDF2 import PdfReader
 
 
+parts = []
 
 def visitor_body(text, cm, tm, font_dict, font_size):
-    print(f"text : {text}")
-    print(f"cm : {cm}")
-    print(f"tm : {tm}")
-    y = tm[5]
-    parts = []
-    #if 50 < y < 720 or y == 0:
-    parts.append(text)
-
-    return parts
+    parts.append(text.rstrip())       
 
 
 reader = PdfReader("statement.pdf")
 page = reader.pages[2]
-parts = page.extract_text(visitor_text=visitor_body)
-#print(parts)
+page.extract_text(visitor_text=visitor_body)
+
+startidx = parts.index("Purchases and Adjustments")
+endidx = parts.index("TOTAL PURCHASES AND ADJUSTMENTS FOR THIS PERIOD")
+
+dates = []
+prices = []
+transactions = []  
+
+for text in parts[startidx+1:endidx]:
+    if text.rstrip() == "":
+        continue
+
+    texts = text.split()
+    dates.append(texts[0])
+    prices.append(float(texts[-1]))
+    transactions.append(" ".join(a for a in texts[2:-3]))
+
+
+print(dates)
+print(prices)
+print(transactions)
+
+    
+
+
+
