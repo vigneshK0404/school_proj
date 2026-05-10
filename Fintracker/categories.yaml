@@ -1,0 +1,32 @@
+transport:
+  - uber
+  - lyft
+dining:
+  - patricks
+  - grubhub
+  - bibibop
+  - subway
+  - elephant walk
+  - chipotle
+  - deli
+  - domino
+  - china food
+  - cheesecake
+  - graeters
+groceries:
+  - kroger
+  - target
+  - wallmart
+  - sams
+  - market
+activites:
+  - pub
+  - top cats
+bills:
+  - rent
+  - zelle
+  - usps
+  - sprintax
+subscriptions:
+  - google
+
