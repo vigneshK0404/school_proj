@@ -1,67 +1,51 @@
-from PyPDF2 import PdfReader
+import pandas as pd
+from abc import ABC,abstractmethod
 
-def boa_process(parts):
-    startidx = parts.index("Purchases and Adjustments")
-    endidx = parts.index("TOTAL PURCHASES AND ADJUSTMENTS FOR THIS PERIOD")
 
-    dates = []
-    prices = []
-    transactions = []  
+class BluePrint(ABC):
+    @abstractmethod
+    def clean_csv(self):
+        pass
 
-    for text in parts[startidx+1:endidx]:
-        if text.strip() == "":
-            continue
 
-        texts = text.split()
-        dates.append(texts[0])
-        prices.append(float(texts[-1]))
-        transactions.append(" ".join(a for a in texts[2:-3]))
+class Financial_Tracker(BluePrint):
+    def __init__(self,path : str):
+        self.path = path
+        self.df = None
 
-    return dates, transactions, prices
+    def clean_csv(self):
+        print("Not implemented in base class")
+        pass
 
-def discover_process(parts): 
 
-    print(parts)
+class BOA(Financial_Tracker):
+    def __init__(self,path : str):
+        super().__init__(path)
+        self.df = pd.read_csv(self.path)[["Posted Date", "Payee", "Amount"]].rename(columns={"Posted Date": "Date", "Payee": "Description"})
 
-    refined = []
 
-    for i in range(len(parts)):
-        x = parts[i].strip()
-        if x == "":
-            continue
-
-        refined.append(x)
+    def clean_csv(self):
+        self.df["Amount"] = -self.df["Amount"]
+        pass
         
-    startidx = refined.index("Category")
-    endidx = -11
 
-    refined = refined[startidx+1:endidx]
-    #print(refined)
-
-    dates = refined[::6]
-    prices = refined[1::6]
-    transactions = refined[2::6]
-
-    return dates,transactions,prices
+class Discover(Financial_Tracker):
+    def __init__(self,path : str):
+        super().__init__(path)
+        self.df = pd.read_csv(self.path)[["Post Date","Description","Amount"]].rename(columns={"Post Date": "Date"})
 
 
+        
+    def clean_csv(self):
+        pass
+        
 
-parts = []
 
-def visitor_body(text, cm, tm, font_dict, font_size):
-    parts.append(text.rstrip())
 
-reader = PdfReader("Discover_statement.pdf")
-page = reader.pages[0]
-page.extract_text(visitor_text=visitor_body)
+if __name__ == "__main__":
+    boa = BOA("boa_statement.csv")
+    boa.clean_csv()
+    disc = Discover("discover_statement.csv")
 
-page = reader.pages[1]
-page.extract_text(visitor_text=visitor_body)
-
-dates,transactions,prices = discover_process(parts)
-
-#print(dates)
-#print(transactions)
-#print(prices)
-    
-
+    print(boa.df)
+    print(disc.df)
