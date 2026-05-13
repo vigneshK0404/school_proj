@@ -29,4 +29,7 @@ bills:
   - sprintax
 subscriptions:
   - google
+  - subscr
+payments:
+  - payment
 
