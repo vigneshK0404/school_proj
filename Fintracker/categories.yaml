@@ -1,35 +1,42 @@
-transport:
-  - uber
-  - lyft
-dining:
-  - patricks
-  - grubhub
-  - bibibop
-  - subway
-  - elephant walk
-  - chipotle
-  - deli
-  - domino
-  - china food
-  - cheesecake
-  - graeters
-groceries:
-  - kroger
-  - target
-  - wallmart
-  - sams
-  - market
 activites:
-  - murphy
-  - top cats
+- murphy
+- top cats
+- seatgeek
 bills:
-  - rent
-  - zelle
-  - usps
-  - sprintax
-subscriptions:
-  - google
-  - subscr
+- rent
+- zelle
+- usps
+- sprintax
+dining:
+- patricks
+- grubhub
+- bibibop
+- subway
+- elephant walk
+- chipotle
+- deli
+- domino
+- china food
+- cheesecake
+- graeters
+- adeep india restaurant
+- coffee
+- raising canes
+groceries:
+- kroger
+- target
+- wallmart
+- sams
+- market
 payments:
-  - payment
-
+- payment
+subscriptions:
+- google
+- subscr
+transport:
+- uber
+- lyft
+- spothero
+- lime
+online_shopping:
+- amazon

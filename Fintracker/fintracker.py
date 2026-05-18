@@ -18,7 +18,8 @@ class Financial_Tracker(BluePrint):
     def __init__(self,path : str, categoryPath : str):
         self.path = path
         self.df = pd.read_csv(path)
-        self.remset = {"cincinnati","oh"}
+        self.remset = {"cincinnati","oh","chicago","il","ny"}
+        self.leftover = None
 
         with open(categoryPath) as stream:
             try:
@@ -46,21 +47,19 @@ class Financial_Tracker(BluePrint):
                 if len(idx) == 0:
                     continue
                 total += self.df["Amount"].iloc[idx].sum()
-                print(key)
-                print(f"{self.df["Description"].iloc[idx].to_string()}")
+                #print(key)
+                #print(f"{self.df["Description"].iloc[idx].to_string()}")
 
                 
             self.transactions[key] = total
 
         misc = self.df["Amount"].sum()
-        leftover = self.df.drop(idxs)   
-
-        #TODO: pass tmp into add YAML and give user the choice to choose what category, add new category or add to misc if error
+        self.leftover = self.df.drop(idxs)
         
         #print(tmp)
         #print(self.df)
 
-        return self.transactions, leftover        
+        return       
         
 
 
@@ -130,13 +129,13 @@ class manageTransactions():
             else:
                 self.categories[category] = [desc]
 
-            if category in self.transacrions.keys():
+            if category in self.transactions.keys():
                 self.transactions[category] += self.leftover["Amount"].iloc[i]
             else:
                 self.transactions[category] = self.leftover["Amount"].iloc[i]
 
 
-        with open(categoryPath, 'w') as file:
+        with open(self.categoryPath, 'w') as file:
             yaml.dump(self.categories, file, default_flow_style=False)
 
 
@@ -146,13 +145,17 @@ class manageTransactions():
 
 
 if __name__ == "__main__":
-    disc = Discover("discover_statement.csv","categories.yaml")
-    disc.clean_csv()
-    print(disc.df)
-    print(disc.categorize())
+    #disc = Discover("discover_statement.csv","categories.yaml")
+    #disc.clean_csv()
+    #disc.categorize()
+    #print(disc.transactions)
 
-    #boa = BOA("boa_statement.csv","categories.yaml")
-    #boa.clean_csv()
-    #print(boa.categorize())
+    boa = BOA("boa_statement.csv","categories.yaml")
+    boa.clean_csv()
+    boa.categorize()
+    print(boa.transactions)
+    manage = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
+    manage.tally()
+
 
     #print(boa.df)
