@@ -119,20 +119,42 @@ class manageTransactions():
         print("Existing Categories")
         print(self.transactions.keys())
 
-        
+        print("\nEnter existing or new Category followed by | and a handle, if handle is empty file will record full name\n")
+
+        repeats = set()
+
         for i in range(dfLen):
             desc = self.leftover["Description"].iloc[i]
-            category = input(f"Category for {desc} : ")
+            found_flag = False
 
-            if category in self.categories.keys():
-                self.categories[category].append(desc)
-            else:
-                self.categories[category] = [desc]
+            #print(f"repeats : {repeats}")
+            for j in repeats:
+                if j in desc:
+                    found_flag = True
+                    break
 
-            if category in self.transactions.keys():
-                self.transactions[category] += self.leftover["Amount"].iloc[i]
-            else:
-                self.transactions[category] = self.leftover["Amount"].iloc[i]
+            if not found_flag:
+                categoryInput = input(f"Category for {desc} : ")
+
+                x = categoryInput.split("|")
+                if len(x) == 2:
+                    category,desc = x
+                else:
+                    category = categoryInput
+
+                category = category.strip()
+                desc = desc.strip()
+                repeats.add(desc)
+
+                if category in self.categories.keys():
+                    self.categories[category].append(desc)
+                else:
+                    self.categories[category] = [desc]
+
+                if category in self.transactions.keys():
+                    self.transactions[category] += self.leftover["Amount"].iloc[i]
+                else:
+                    self.transactions[category] = self.leftover["Amount"].iloc[i]
 
 
         with open(self.categoryPath, 'w') as file:

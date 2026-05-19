@@ -2,6 +2,8 @@ activites:
 - murphy
 - top cats
 - seatgeek
+- hotel
+- cliftonheights
 bills:
 - rent
 - zelle
@@ -22,12 +24,20 @@ dining:
 - adeep india restaurant
 - coffee
 - raising canes
+- tous les jours
+- los taquitos
+- the goods
+- five star breaktime
 groceries:
 - kroger
 - target
 - wallmart
 - sams
 - market
+misc:
+- liquor
+online_shopping:
+- amazon
 payments:
 - payment
 subscriptions:
@@ -37,6 +47,5 @@ transport:
 - uber
 - lyft
 - spothero
+- ventra
 - lime
-online_shopping:
-- amazon
