@@ -107,7 +107,7 @@ class manageTransactions():
 
         retL = pd.concat([self.leftover,other.leftover])
 
-        return retT, retL
+        return manageTransactions(retT, retL, self.categoryPath)
 
    
     def tally(self):
@@ -167,17 +167,20 @@ class manageTransactions():
 
 
 if __name__ == "__main__":
-    #disc = Discover("discover_statement.csv","categories.yaml")
-    #disc.clean_csv()
-    #disc.categorize()
-    #print(disc.transactions)
-
+    disc = Discover("discover_statement.csv","categories.yaml")
+    disc.clean_csv()
+    disc.categorize()
+    
     boa = BOA("boa_statement.csv","categories.yaml")
     boa.clean_csv()
     boa.categorize()
-    print(boa.transactions)
-    manage = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
-    manage.tally()
+    
+    manageboa = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
+    managedisc = manageTransactions(disc.transactions,disc.leftover,"categories.yaml")
+
+    manageboa = manageboa + managedisc
+
+    manageboa.tally()
 
 
     #print(boa.df)
