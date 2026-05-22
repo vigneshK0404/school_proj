@@ -10,7 +10,6 @@ bills:
 - usps
 - sprintax
 dining:
-- patricks
 - grubhub
 - bibibop
 - subway
@@ -29,6 +28,7 @@ dining:
 - the goods
 - five star breaktime
 - incline public house
+- patricks
 groceries:
 - kroger
 - target

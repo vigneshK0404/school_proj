@@ -178,9 +178,16 @@ if __name__ == "__main__":
     manageboa = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
     managedisc = manageTransactions(disc.transactions,disc.leftover,"categories.yaml")
 
-    manageboa = manageboa + managedisc
+    manageT = manageboa + managedisc
 
-    manageboa.tally()
-
-
-    #print(boa.df)
+    manageT.tally()
+    
+    print("BOA")
+    print(boa.transactions)
+    print(boa.leftover)
+ 
+    print("DISC")
+    print(disc.transactions)
+    print(disc.leftover)
+    print("Total")
+    print(manageT.transactions)
