@@ -2,7 +2,7 @@ import pandas as pd
 from abc import ABC,abstractmethod
 import yaml
 import re
-
+from datetime import datetime
 
 class BluePrint(ABC):
     @abstractmethod
@@ -35,6 +35,9 @@ class Financial_Tracker(BluePrint):
             self.df["Description"] = self.df["Description"].str.replace(i,'')
 
         self.df["Description"] = self.df["Description"].str.replace(r'[^A-Za-z\s]','',regex=True).str.strip()
+        self.df['Date'] = pd.to_datetime(self.df['Date'], format='%m/%d/%Y')
+        self.df = self.df.sort_values(by="Date") 
+  
         return
     
     def categorize(self):
@@ -74,6 +77,24 @@ class BOA(Financial_Tracker):
         self.df = self.df[["Posted Date", "Payee", "Amount"]].rename(columns={"Posted Date": "Date", "Payee": "Description"})
         self.df["Amount"] = -self.df["Amount"]
         super().clean_csv()
+
+        with open("dateFileBOA.txt") as f:
+            x = f.read()
+            if x != "":
+                xs = x.split("-")
+                tmpEarly,tmpLate = xs
+                tmpEarly = datetime.strptime(tmpEarly,"%m/%d/%Y")
+                tmpLate = datetime.strptime(tmpLate,"%m/%d/%Y")
+                self.df = self.df.loc[(self.df["Date"] < tmpEarly) | (self.df["Date"] > tmpLate) ]
+
+        if len(self.df) == 0:
+            return
+
+        early = self.df["Date"].iloc[0]
+        late = self.df["Date"].iloc[-1]
+        with open("dateFileBOA.txt", "w") as f:
+            f.write(f"{early.strftime('%m/%d/%Y')}-{late.strftime('%m/%d/%Y')}")
+
         return
         
 
@@ -84,6 +105,24 @@ class Discover(Financial_Tracker):
     def clean_csv(self):
         self.df = self.df[["Post Date","Description","Amount"]].rename(columns={"Post Date": "Date"})
         super().clean_csv()
+
+        with open("dateFileDisc.txt") as f:
+            x = f.read()
+            if x != "":
+                xs = x.split("-")
+                tmpEarly,tmpLate = xs
+                tmpEarly = datetime.strptime(tmpEarly,"%m/%d/%Y")
+                tmpLate = datetime.strptime(tmpLate,"%m/%d/%Y")
+                self.df = self.df.loc[(self.df["Date"] < tmpEarly) | (self.df["Date"] > tmpLate) ]
+
+        if len(self.df) == 0:
+            return
+
+        early = self.df["Date"].iloc[0]
+        late = self.df["Date"].iloc[-1]
+        with open("dateFileDisc.txt", "w") as f:
+            f.write(f"{early.strftime('%m/%d/%Y')}-{late.strftime('%m/%d/%Y')}")
+
         return    
 
 
@@ -167,27 +206,42 @@ class manageTransactions():
 
 
 if __name__ == "__main__":
+
     disc = Discover("discover_statement.csv","categories.yaml")
     disc.clean_csv()
-    disc.categorize()
-    
+
     boa = BOA("boa_statement.csv","categories.yaml")
     boa.clean_csv()
-    boa.categorize()
-    
-    manageboa = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
-    managedisc = manageTransactions(disc.transactions,disc.leftover,"categories.yaml")
 
-    manageT = manageboa + managedisc
+    discL = len(disc.df) != 0
+    boaL = len(boa.df) != 0
 
-    manageT.tally()
-    
-    print("BOA")
-    print(boa.transactions)
-    print(boa.leftover)
- 
-    print("DISC")
-    print(disc.transactions)
-    print(disc.leftover)
-    print("Total")
-    print(manageT.transactions)
+    if discL:
+        disc.categorize()
+        managedisc = manageTransactions(disc.transactions,disc.leftover,"categories.yaml")
+        
+    if boaL:
+        boa.categorize()
+        manageboa = manageTransactions(boa.transactions,boa.leftover,"categories.yaml")
+
+
+    if discL and boaL:
+        manageT = manageboa + managedisc
+    elif discL and not boaL:
+        manageT = managedisc
+    elif boaL and not discL:
+        manageT = manageboa
+
+
+    if discL or boaL:
+        manageT.tally()
+        
+        print("BOA")
+        print(boa.transactions)
+        print(boa.leftover)
+     
+        print("DISC")
+        print(disc.transactions)
+        print(disc.leftover)
+        print("Total")
+        print(manageT.transactions)
