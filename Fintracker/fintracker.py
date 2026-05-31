@@ -19,12 +19,12 @@ class Financial_Tracker(BluePrint):
         self.path = path
         self.df = pd.read_csv(path)
         self.remset = {"cincinnati","oh","chicago","il","ny"}
-        self.leftover = None
+        self.groupedLeftover = {}
+        self.groupedTrans = {}
 
         with open(categoryPath) as stream:
             try:
                 self.categories = yaml.safe_load(stream)
-                self.transactions = dict.fromkeys(self.categories)
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -41,27 +41,25 @@ class Financial_Tracker(BluePrint):
         return
     
     def categorize(self):
-        idxs = []
-        for key in self.categories.keys():
-            total = 0
-            for value in self.categories[key]:
-                idx = self.df["Description"].index[self.df["Description"].str.contains(value)]
-                idxs.extend(idx)
-                if len(idx) == 0:
-                    continue
-                total += self.df["Amount"].iloc[idx].sum()
-                #print(key)
-                #print(f"{self.df["Description"].iloc[idx].to_string()}")
+        grouped = self.df.groupby(self.df['Date'].dt.to_period('M'))
+        for period, group in grouped:
+            month_name = str(period)
+            transactions = dict.fromkeys(self.categories)
+            idxs = []
+            for key in self.categories.keys():
+                total = 0
+                for value in self.categories[key]:
+                    idx = grouped["Description"].index[grouped["Description"].str.contains(value)]
+                    idxs.extend(idx)
+                    if len(idx) == 0:
+                        continue
+                    total += grouped["Amount"].iloc[idx].sum()
+                    
+                transactions[key] = total
 
-                
-            self.transactions[key] = total
-
-        misc = self.df["Amount"].sum()
-        self.leftover = self.df.drop(idxs)
-        
-        #print(tmp)
-        #print(self.df)
-
+            self.GroupedTrans[month_name] = transactions
+            self.GroupedLeftover[month_name] = self.df.drop(idxs)
+            
         return       
         
 
@@ -127,9 +125,9 @@ class Discover(Financial_Tracker):
 
 
 class manageTransactions():
-    def __init__(self,transactions : dict, leftover : pd.DataFrame, categoryPath : str):
-        self.transactions = transactions
-        self.leftover = leftover
+    def __init__(self,GroupedTrans : dict, GroupedLeftover : dict, categoryPath : str):
+        self.GroupedTrans = GroupedTrans
+        self.GroupedLeftover = GroupedLeftover
         self.categoryPath = categoryPath
 
         with open(categoryPath) as stream:
@@ -140,13 +138,34 @@ class manageTransactions():
 
 
     def __add__(self,other):
-        retT = {}
-        for key in self.transactions.keys():
-            retT[key] = self.transactions[key] + other.transactions[key]
+        GretT = {}
+        selfM = set(self.GroupedTrans.keys()) 
+        otherM = set(other.GroupedTrans.keys())
+        totalM = selfM | otherM
 
-        retL = pd.concat([self.leftover,other.leftover])
+        for month in totalM:
+            retT = {}
+            if month in (selfM & otherM):
+                st = self.GroupedTrans[month]
+                ot = other.GroupedTrans[month]
+                for key in st.keys():
+                    retT[key] = st[key] + ot[key]
 
-        return manageTransactions(retT, retL, self.categoryPath)
+                GretL[month] = pd.concat([self.GroupedLeftover[month],other.GroupedLeftover[month]])
+
+            elif month in (selfM - otherM):
+                for key in st.keys():
+                    retT[key] = st[key] 
+
+                GretL[month] = self.GroupedLeftover[month]
+            else:
+                for key in ot.keys():
+                    retT[key] = ot[key] 
+
+                GretL[month] = other.GroupedLeftover[month]
+
+
+        return manageTransactions(GretT, GretL, self.categoryPath)
 
    
     def tally(self):
